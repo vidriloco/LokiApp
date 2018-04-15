@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleDisplayName</key>
+	<string>LokiApp</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+    <key>NSAllowsArbitraryLoads</key>
+    <true/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>localhost</key>
+			<dict>
+        <key>NSIncludesSubdomains</key>
+        <true/>
+        <key>NSExceptionAllowsInsecureHTTPLoads</key>
+        <true/>
+        <key>NSExceptionRequiresForwardSecrecy</key>
+        <true/>
+        <key>NSExceptionMinimumTLSVersion</key>
+        <string>TLSv1.2</string>
+        <key>NSThirdPartyExceptionAllowsInsecureHTTPLoads</key>
+        <false/>
+        <key>NSThirdPartyExceptionRequiresForwardSecrecy</key>
+        <true/>
+        <key>NSThirdPartyExceptionMinimumTLSVersion</key>
+        <string>TLSv1.2</string>
+        <key>NSRequiresCertificateTransparency</key>
+        <false/>
+			</dict>
+		</dict>
+	</dict>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>armv7</string>
+	</array>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<false/>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Roboto_medium.ttf</string>
+		<string>Roboto.ttf</string>
+		<string>rubicon-icon-font.ttf</string>
+	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+		<string>fetch</string>
+	</array>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Esta app necesita utilizar tu ubicación todo el tiempo cuando te unes a compartir una ruta</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Esta app utiliza tu ubicación cuando está abierta para mostrar tu ubicación actual en el mapa y todo el tiempo para compartir tu ubicación anónimamente a lo largo de una ruta</string>
+	<key>NSMotionUsageDescription</key>
+	<string>Mediante esta app compartes tu ubicación a lo largo de una ruta</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Esta app utiliza tu ubicación cuando está abierta para mostrar tu ubicación actual en el mapa</string>
+</dict>
+</plist>

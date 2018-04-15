@@ -1,0 +1,30 @@
+{
+  "name": "LokiApp",
+  "version": "0.1.0",
+  "private": true,
+  "devDependencies": {
+    "@expo/vector-icons": "^6.3.1",
+    "jest-react-native": "^18.0.0",
+    "react-native-clean-project": "^1.0.7",
+    "react-test-renderer": "16.2.0"
+  },
+  "scripts": {
+    "start": "react-native start",
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "test": "node node_modules/jest/bin/jest.js"
+  },
+  "jest": {
+    "preset": "react-native"
+  },
+  "dependencies": {
+    "native-base": "^2.4.1",
+    "react": "16.0.0",
+    "react-native": "0.52.0",
+    "react-native-background-geolocation": "^2.12.0-beta.3",
+    "react-native-elements": "^0.19.0",
+    "react-native-maps": "0.20.1",
+    "react-native-vector-icons": "^4.5.0",
+    "react-navigation": "^1.5.2"
+  }
+}
