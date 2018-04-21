@@ -13,7 +13,7 @@ export default class LandingScreen extends React.Component {
 				<View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', marginLeft: 60, marginRight: 60 }}>
 	    		<Image source={{uri: this.props.imageUrl }} style={{ height: 200, width: 200 }}/>
 					<Text style={{fontWeight: 'bold', color: '#058AF3', fontSize: 25, marginTop: 20 }}>Loki</Text>
-					<Text style={{fontWeight: 'bold', color: 'black', fontSize: 15, marginTop: 5 }}>Rutas colaborativas en tiempo real</Text>
+					<Text style={{fontWeight: 'bold', color: 'black', fontSize: 15, marginTop: 5, textAlign: 'center'  }}>Rutas colaborativas en tiempo real</Text>
 				
 					{/*<Text style={{color: 'black', fontSize: 13, marginTop: 30, textAlign: 'center' }}>Accede a servicios adicionales y a una experiencia de viaje personalizada</Text>
 					<Button rounded style={{ marginTop: 20, marginLeft: 'auto', marginRight: 'auto', paddingLeft: 20, paddingRight: 20 }}>

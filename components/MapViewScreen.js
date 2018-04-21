@@ -2,7 +2,8 @@ import React from 'react';
 import { View, Image, Text, StyleSheet, Alert } from 'react-native';
 import { Icon, Button, Body, Title, List, ListItem, Thumbnail, Content, Left, Right } from 'native-base';
 
-import MapView from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
+import Geojson from 'react-native-geojson';
 
 export default class MapViewScreen extends React.Component {
 	
@@ -18,7 +19,9 @@ export default class MapViewScreen extends React.Component {
       longitude: null,
       error: null,
 			locationUpdating: false,
-			currentRouteId: this.props.navigation.state.params.routeId
+			currentRouteId: this.props.navigation.state.params.routeId,
+			currentRoutePath: this.props.navigation.state.params.routePath,
+			vehicles: [],
     };
   }
 		
@@ -27,6 +30,7 @@ export default class MapViewScreen extends React.Component {
 		if(this.state.currentRouteId == global.currentRouteId) {
 			this.setState({ locationUpdating: true });
 		}
+		this.fetchVehicles();
 	}
 	
   render() {
@@ -34,8 +38,18 @@ export default class MapViewScreen extends React.Component {
 			<View style={styles.container} navigation={this.props.navigation}>
 				<MapView style={styles.map}
 					showsUserLocation
-					ref={(ref) => { this.map = ref }}
-			  />
+					ref={(ref) => { this.map = ref }}>
+					<Geojson geojson={ this.state.currentRoutePath } strokeColor="blue"  fillColor="blue" strokeWidth={3} />
+					{this.state.vehicles.map(marker => (
+					    <Marker
+								key={marker.id}
+					      coordinate={marker.latlng}
+					      title={marker.title}
+								image={marker.image}
+					      description={marker.description}
+					    />
+					  )) }
+				</MapView>
 				{ this.debugInfo() }
 				<View style={styles.bottomContainer}>
 					<View style={styles.bottomButtons}>
@@ -48,6 +62,15 @@ export default class MapViewScreen extends React.Component {
 			</View>
     );
   }
+	
+	fetchVehicles() {
+		this.setState({
+			vehicles: [
+					{ id: 1, latlng: { latitude: 19.49023665494256, longitude: -99.092984133749027 }, title: "Vehículo 1", description: "Última actualización hace 1 minuto", image: "https://lh3.googleusercontent.com/4lynMNVdriXHdH-ckfPUzD4Zi8WBAqYJ85gDgmuErW4lwg-5DsxZW2dH3lLeb4JKLK0uGNSaIh4W7A=w3360-h1812" },
+					{ id: 2, latlng: { latitude: 19.427941848472781, longitude: -99.111853519781988 }, title: "Vehículo 2", description: "Última actualización hace 3 minutos", image: "https://lh3.googleusercontent.com/4lynMNVdriXHdH-ckfPUzD4Zi8WBAqYJ85gDgmuErW4lwg-5DsxZW2dH3lLeb4JKLK0uGNSaIh4W7A=w3360-h1812" }
+			]
+		});
+	}
 	
 	routeInfoOrJoin() {
 		if(this.state.locationUpdating || this.state.currentRouteId == global.currentRouteId) {
