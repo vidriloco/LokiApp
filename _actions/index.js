@@ -1,25 +1,43 @@
 import APIRouter from '../_api/APIRouter';
 import { Alert } from 'react-native'
 
-export const loginChanged = (login) => {
-  return {
-    type: 'LOGIN_CHANGED',
-    payload: login
-  };
-};
-
-export const passwordChanged = (password) => {
-  return {
-    type: 'PASSWORD_CHANGED',
-    payload: password
-  };
-};
-
 export function logIn(username, password) {
 	return function(dispatch) {
 		
 		if(typeof username === 'undefined' || username.length == 0) {
-			notificationMessageWith("Inicio de sesión", "Es necesario un nombre de usuario o email para iniciar sesión");
+			return;
+		}
+		
+		if(typeof password === 'undefined' || password.length == 0) {
+			return;
+		}
+		
+		dispatch(busyStateInitiated());
+		var {url, body} = APIRouter.userLogin(username, password);
+		
+    	return fetch(url, body).then(response => {
+				if(response.ok) {
+					dispatch(userLoginSuccess(response.session));
+				} else {
+					throw new Error("Ups, no pudimos iniciar sesión");
+				}
+    	}).catch(error => {
+				notificationMessageWith("Inicio de sesión", "No pudimos iniciar sesión con el email o nombre de usuario y password que ingresaste. Verifica que sean correctos");
+				dispatch(errorState(error));
+			});
+  	};
+}
+
+export function signUp(username, email, password) {
+	return function(dispatch) {
+		
+		if(typeof username === 'undefined' || username.length == 0) {
+			notificationMessageWith("Registro", "Es necesario un nombre de usuario para crear una cuenta");
+			return;
+		}
+		
+		if(typeof email === 'undefined' || email.length == 0) {
+			notificationMessageWith("Registro", "Es necesario proporcionar un e-mail para crear una cuenta");
 			return;
 		}
 		
@@ -29,37 +47,18 @@ export function logIn(username, password) {
 		}
 		
 		dispatch(busyStateInitiated());
-		var {url, body} = APIRouter.userLogin(username, password);
+		var {url, body} = APIRouter.userRegistration(username, email, password);
 		
     	return fetch(url, body).then(response => {
-			if(response.ok) {
-				dispatch(createUserSuccess(user));
-			} else {
-				throw new Error("Ups, no pudimos iniciar sesión");
-			}
-    	}).catch(error => {
-				notificationMessageWith("Inicio de sesión", "No pudimos iniciar sesión con el email o nombre de usuario y password que ingresaste. Verifica que sean correctos");
+				if(response.ok) {
+					dispatch(userRegistrationSuccess(response.user));
+				} else {
+					throw new Error("Ups, ocurrió un problema");
+				}
+	    }).catch(error => {
+				notificationMessageWith("Registro", "No pudimos crear tu cuenta con los datos que proporcionaste. Verifica que el email sea válido.");
 				dispatch(errorState(error));
-		});
-  	};
-}
-
-export function signUp(username, email, password) {
-	return function(dispatch) {
-		
-		dispatch(busyStateInitiated());
-		var {url, body} = APIRouter.userLogin(username, email);
-		
-    	return fetch(url, body).then(response => {
-			if(response.ok) {
-				dispatch(createUserSuccess(user));
-			} else {
-				throw new Error("Ups, ocurrió un problema");
-			}
-    	}).catch(error => {
-			alert(error);
-			dispatch(errorState(error));
-		});
+			});
   	};
 }
 
@@ -74,18 +73,52 @@ function notificationMessageWith(title, message) {
 	)
 }
 
+// Constants for login/sign-up events
+
+export const emailChanged = (email) => {
+  return {
+    type: 'EMAIL_CHANGED',
+    payload: email
+  };
+};
+
+export const usernameChanged = (username) => {
+  return {
+    type: 'USERNAME_CHANGED',
+    payload: username
+  };
+};
+
+export const loginChanged = (login) => {
+  return {
+    type: 'LOGIN_CHANGED',
+    payload: login
+  };
+};
+
+export const passwordChanged = (password) => {
+  return {
+    type: 'PASSWORD_CHANGED',
+    payload: password
+  };
+};
+
+// Functions for login/sign-up events
+
+export function userLoginSuccess(user) {  
+  return {type: 'USER_LOGIN_SUCCESS', user};
+}
+
+export function userRegistrationSuccess(user) {  
+  return {type: 'USER_CREATION_SUCCESS', user};
+}
+
+// Shared states throughout the app
+
 export function busyStateInitiated() {  
   return {type: 'BUSY_STATE'};
 }
 
-export function loadUsersSuccess(cats) {  
-  return {type: 'LOAD_CATS_SUCCESS', cats};
-}
-
 export function errorState(error) {  
   return {type: 'ERROR', error};
-}
-
-export function createUserSuccess(user) {  
-  return {type: 'USER_CREATION_SUCCESS', user};
 }

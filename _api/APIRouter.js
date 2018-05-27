@@ -20,12 +20,12 @@ class APIRouter {
 	}
 	
 	// Users routes
-	static userLogin(username, password) {
+	static userLogin(login, password) {
 		return { 
 			url: `${this.backendURL}/api/users/login`,
 			body: this.requestDetails('POST', {
     		session: {
-    			login: username,
+    			login: login,
 					password: password
     		}
     	})
@@ -34,9 +34,9 @@ class APIRouter {
 	
 	static userRegistration(username, email, password) {
 		return { 
-			url: `${backendURL}/api/users/sign_up`,
+			url: `${this.backendURL}/api/users/sign_up`,
 			body: this.requestDetails('POST', {
-	    	user: {
+	    	registration: {
 	    		username: username,
 					email: email,
 					password: password

@@ -3,6 +3,7 @@ import LandingScreen from './components/LandingScreen.js';
 import RouteListScreen from './components/RouteListScreen.js';
 import MapViewScreen from './components/MapViewScreen.js';
 import LoginScreen from './components/LoginScreen.js';
+import SignupScreen from './components/SignupScreen.js';
 
 import { Provider } from 'react-redux';
 import configureStore from './_store/configureStore';
@@ -44,6 +45,7 @@ const fade = (props) => {
 const RouterStack = StackNavigator({
   LandingScreen: { screen: LandingScreen },
 	LoginScreen: { screen: LoginScreen },
+	SignupScreen: { screen: SignupScreen },
 	RouteListScreen: { screen: RouteListScreen },
 	MapViewScreen: { screen: MapViewScreen }
 }, {

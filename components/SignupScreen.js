@@ -3,19 +3,23 @@ import { View, Text, ActivityIndicator, Image, TextInput } from 'react-native';
 import { Button } from 'native-base';
 import _ from 'lodash';
 import { connect } from 'react-redux';
-import { loginChanged, passwordChanged, logIn } from '../_actions/';
+import { usernameChanged, emailChanged, passwordChanged, signUp } from '../_actions/';
 
-class LoginScreen extends Component {
+class SignupScreen extends Component {
   constructor(props) {
       super(props);
   }
 	
   onButtonSubmit() {
-		this.props.logIn(this.props.users.login, this.props.users.password);
+		this.props.signUp(this.props.users.username, this.props.users.email, this.props.users.password);
   }
 	
-  loginChanged(value) {
-    this.props.loginChanged(value.trim());
+  usernameChanged(value) {
+    this.props.usernameChanged(value.trim());
+  }
+	
+  emailChanged(value) {
+    this.props.emailChanged(value.trim());
   }
 	
   passwordChanged(value) {
@@ -49,12 +53,12 @@ class LoginScreen extends Component {
     return (
 		<View style={{flex: 1, flexDirection: 'column'}}>
 			<Button rounded style={{ marginTop: 20, marginLeft: 'auto', marginRight: 'auto', paddingLeft: 20, paddingRight: 20 }} onPress={() => this.onButtonSubmit() }>
-      	<Text style={{ color: 'white', textAlign: 'center' }}>Iniciar Sesión</Text>
+      	<Text style={{ color: 'white', textAlign: 'center' }}>Crear cuenta</Text>
     	</Button>
 			<View style={{flex: 1, flexDirection: 'column', marginTop: 50 }}>
-				<Text style={{fontWeight: 'bold', color: '#058AF3', fontSize: 14 }}>No tienes cuenta aún?</Text>
-				<Button rounded warning style={{ marginTop: 8, marginLeft: 'auto', marginRight: 'auto', paddingLeft: 20, paddingRight: 20 }} onPress={() => this.props.navigation.navigate('SignupScreen') }>
-	      	<Text style={{ color: 'white', textAlign: 'center' }}>Registrate</Text>
+				<Text style={{fontWeight: 'bold', textAlign: 'center', color: '#058AF3', fontSize: 14 }}>Ya tienes cuenta?</Text>
+				<Button rounded warning style={{ marginTop: 8, marginLeft: 'auto', marginRight: 'auto', paddingLeft: 20, paddingRight: 20 }} onPress={() => this.props.navigation.navigate('LoginScreen') }>
+	      	<Text style={{ color: 'white', textAlign: 'center' }}>Inicia sesión</Text>
 	    	</Button>
 			</View>
 		</View>
@@ -64,18 +68,25 @@ class LoginScreen extends Component {
   render() {
     return (
       <View style={{ flex: 1, backgroundColor: '#CAE8FF' }}>
-		<View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', marginLeft: 60, marginRight: 60 }}>
+			<View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', marginLeft: 60, marginRight: 60 }}>
     		<Image source={{uri: this.props.imageUrl }} style={{ height: 100, width: 100, marginTop: 30 }}/>
 				<Text style={{fontWeight: 'bold', color: '#058AF3', fontSize: 25, marginTop: 10 }}>Loki</Text>
-				<Text style={{fontWeight: 'bold', fontSize: 15, marginTop: 30, textAlign: 'center', marginBottom: 10  }}>Inicia sesión para seguir y compartir rutas</Text>
+				<Text style={{fontWeight: 'bold', fontSize: 15, marginTop: 30, textAlign: 'center', marginBottom: 10  }}>Registrate para seguir y compartir rutas</Text>
         {this.renderError()}
 				
+		      <TextInput
+						autoCapitalize = 'none'
+			  		style={ styles.textInput }
+			  		placeholder="Nombre de usuario"
+		        onChangeText={this.usernameChanged.bind(this)}
+		        value={this.props.username} />
+					
 	        <TextInput
 						autoCapitalize = 'none'
 			  		style={ styles.textInput }
-			  		placeholder="Nombre de usuario o e-mail"
-	          onChangeText={this.loginChanged.bind(this)}
-	          value={this.props.login} />
+			  		placeholder="E-mail"
+	          onChangeText={this.emailChanged.bind(this)}
+	          value={this.props.email} />
 
 	        <TextInput
 						autoCapitalize = 'none'
@@ -85,9 +96,9 @@ class LoginScreen extends Component {
 	          value={this.props.password}
 	          secureTextEntry />
 		  
-			{ this.renderButton() }
-		</View>
-      </View>
+						{ this.renderButton() }
+				</View>
+    	</View>
     );
   }
 }
@@ -108,15 +119,16 @@ const styles = {
 
 const mapStateToProps = (state, ownProps) => {
 	return Object.assign({}, state, {
-    login: state.login,
+		username: state.username,
+    email: state.email,
     password: state.password,
     error: state.errorFlag,
     saving: state.saving
 	});
 };
 
-export default connect(mapStateToProps, { loginChanged, passwordChanged, logIn })(LoginScreen);
+export default connect(mapStateToProps, { usernameChanged, emailChanged, passwordChanged, signUp })(SignupScreen);
 
-LoginScreen.defaultProps = {
+SignupScreen.defaultProps = {
    imageUrl: "https://s3.amazonaws.com/ionic-io-static/eZY17CDPQT2y2Lpypr0r_bungy-logo.png"
 }
