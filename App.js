@@ -2,11 +2,21 @@ import React from 'react';
 import LandingScreen from './components/LandingScreen.js';
 import RouteListScreen from './components/RouteListScreen.js';
 import MapViewScreen from './components/MapViewScreen.js';
+import LoginScreen from './components/LoginScreen.js';
+
+import { Provider } from 'react-redux';
+import configureStore from './_store/configureStore';
+
 import { StackNavigator } from 'react-navigation';
 
-export default class App extends React.Component {	
+export default class App extends React.Component {		
 	render() {
-		return <RouterStack />;
+		const store = configureStore();
+		
+		return (
+			<Provider store={store}>
+        <RouterStack />
+			</Provider>);
 	}
 }
 
@@ -33,6 +43,7 @@ const fade = (props) => {
 
 const RouterStack = StackNavigator({
   LandingScreen: { screen: LandingScreen },
+	LoginScreen: { screen: LoginScreen },
 	RouteListScreen: { screen: RouteListScreen },
 	MapViewScreen: { screen: MapViewScreen }
 }, {

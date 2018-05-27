@@ -20,8 +20,8 @@ export default class LandingScreen extends React.Component {
 	        	<Text style={{ color: 'white', textAlign: 'center' }}>Únete a Loki</Text>
 	      	</Button> */}
 					<Text style={{color: 'black', fontSize: 13, marginTop: 30, textAlign: 'center' }}>Ubicaciones en tiempo real compartidas anónimamente para mejorar la movilidad</Text>
-					<Button rounded style={{ marginTop: 20, marginLeft: 'auto', marginRight: 'auto', paddingLeft: 20, paddingRight: 20 }} onPress={() => this.props.navigation.navigate('RouteListScreen')}>
-	        	<Text style={{ color: 'white', textAlign: 'center' }}>Descubre rutas cercanas</Text>
+					<Button rounded style={{ marginTop: 20, marginLeft: 'auto', marginRight: 'auto', paddingLeft: 20, paddingRight: 20 }} onPress={() => this.props.navigation.navigate('LoginScreen')}>
+	        	<Text style={{ color: 'white', textAlign: 'center' }}>-></Text>
 	      	</Button>
 					{/*<Button rounded bordered style={{ marginTop: 20, marginLeft: 'auto', marginRight: 'auto', paddingLeft: 20, paddingRight: 20 }}>
 	        	<Text style={{ color: '#058AF3', textAlign: 'center' }}>O ve rutas cercanas a tí</Text>
