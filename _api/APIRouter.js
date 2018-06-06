@@ -1,11 +1,11 @@
+import LocalStore from '../_helpers/LocalStore';
+
 class APIRouter {
 	static backendURL = "http://localhost:3000";
 	
-	static handleErrors(response) {
-    if (!response.ok) {
-        throw new Error(response.statusText);
-    }
-    return response;
+	static handleErrors(response) {		
+    if (!response.ok) { throw response }
+		return response.json(); 
 	}
 	
 	static requestDetails(method, params) {		
@@ -42,6 +42,14 @@ class APIRouter {
 					password: password
 	    	}
 	    })
+		};
+	}
+	
+	// Routes routes
+	
+	static availableRoutesForCurrentUser() {
+		return {
+			url: `${this.backendURL}/api/routes?auth_token=${LocalStore.currentUserToken()}`
 		};
 	}
 }

@@ -1,5 +1,6 @@
 import APIRouter from '../_api/APIRouter';
 import { Alert } from 'react-native'
+import LocalStore from '../_helpers/LocalStore';
 
 export function logIn(username, password) {
 	return function(dispatch) {
@@ -15,15 +16,16 @@ export function logIn(username, password) {
 		dispatch(busyStateInitiated());
 		var {url, body} = APIRouter.userLogin(username, password);
 		
-    	return fetch(url, body).then(response => {
-				if(response.ok) {
-					dispatch(userLoginSuccess(response.session));
-				} else {
-					throw new Error("Ups, no pudimos iniciar sesión");
-				}
-    	}).catch(error => {
-				notificationMessageWith("Inicio de sesión", "No pudimos iniciar sesión con el email o nombre de usuario y password que ingresaste. Verifica que sean correctos");
-				dispatch(errorState(error));
+    return fetch(url, body)
+			.then(APIRouter.handleErrors)
+			.then(response => {
+				LocalStore.setCurrentUserToken(response.user.authToken);
+				dispatch(userLoginSuccess(response.user));
+	    }).catch(error => {
+				error.json().then(errorJSON => {
+					notificationMessageWith("Inicio de sesión", errorJSON.message);
+					dispatch(errorState(errorJSON));
+				});
 			});
   	};
 }
@@ -49,17 +51,18 @@ export function signUp(username, email, password) {
 		dispatch(busyStateInitiated());
 		var {url, body} = APIRouter.userRegistration(username, email, password);
 		
-    	return fetch(url, body).then(response => {
-				if(response.ok) {
-					dispatch(userRegistrationSuccess(response.user));
-				} else {
-					throw new Error("Ups, ocurrió un problema");
-				}
+		return fetch(url, body)
+			.then(APIRouter.handleErrors)
+			.then(response => {				
+				LocalStore.setCurrentUserToken(response.user.authToken);
+				dispatch(userRegistrationSuccess(response.user));
 	    }).catch(error => {
-				notificationMessageWith("Registro", "No pudimos crear tu cuenta con los datos que proporcionaste. Verifica que el email sea válido.");
-				dispatch(errorState(error));
+				error.json().then(errorJSON => {
+					notificationMessageWith("Registro", errorJSON.message);
+					dispatch(errorState(errorJSON));
 			});
-  	};
+		});
+  };
 }
 
 function notificationMessageWith(title, message) {

@@ -9,6 +9,7 @@ import { Provider } from 'react-redux';
 import configureStore from './_store/configureStore';
 
 import { StackNavigator } from 'react-navigation';
+import LocalStore from './_helpers/LocalStore';
 
 export default class App extends React.Component {		
 	render() {
@@ -42,16 +43,31 @@ const fade = (props) => {
     }
 }
 
-const RouterStack = StackNavigator({
-  LandingScreen: { screen: LandingScreen },
-	LoginScreen: { screen: LoginScreen },
-	SignupScreen: { screen: SignupScreen },
-	RouteListScreen: { screen: RouteListScreen },
-	MapViewScreen: { screen: MapViewScreen }
-}, {
-	transitionConfig: () => ({
-	        screenInterpolator: (props) => {
-	            return fade(props)
-	        }
-	    })
-});
+function initialRouteFor(router) {
+	if(LocalStore.currentUserToken() != null) {
+		return router("RouteListScreen");	
+	}
+	return router("RouteListScreen");
+}
+
+function configureRouter(initialRoute) {
+	return StackNavigator({
+	  LandingScreen: { screen: LandingScreen },
+		LoginScreen: { screen: LoginScreen },
+		SignupScreen: { screen: SignupScreen },
+		RouteListScreen: { screen: RouteListScreen, navigationOptions:  {
+	    	headerLeft: null 
+			} 
+		},
+		MapViewScreen: { screen: MapViewScreen }
+	}, {
+		initialRouteName: initialRoute,
+		transitionConfig: () => ({
+			screenInterpolator: (props) => {
+				return fade(props)
+			}
+    })
+	});
+}
+
+const RouterStack = initialRouteFor(configureRouter);

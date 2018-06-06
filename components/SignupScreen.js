@@ -64,6 +64,12 @@ class SignupScreen extends Component {
 		</View>
     );
   }
+	
+	componentDidUpdate() {
+		if (this.props.users.authorized) {
+			this.props.navigation.navigate({ routeName: 'RouteListScreen' });
+		}
+	}
 
   render() {
     return (
@@ -121,9 +127,10 @@ const mapStateToProps = (state, ownProps) => {
 	return Object.assign({}, state, {
 		username: state.username,
     email: state.email,
-    password: state.password,
     error: state.errorFlag,
-    saving: state.saving
+    saving: state.saving,
+		authorized: state.authorized,
+		authToken: state.authToken
 	});
 };
 

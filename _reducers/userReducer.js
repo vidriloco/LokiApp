@@ -3,7 +3,6 @@ const INITIAL_STATE = {
   email: '',
   login: '',
   password: '',
-  authentication_token: '',
   errorFlag: false,
   saving: false
 };
@@ -21,13 +20,13 @@ export default function users(state = INITIAL_STATE, action) {
     case 'LOGIN_FAILED':
       return { ...state, errorFlag: true, password: '', spinner: false };
     case 'USER_LOGIN_SUCCESS':
-      return Object.assign({}, state, { saving: false });
+      return Object.assign({}, state, { saving: false, authorized: true, authToken: action.user.authToken });
     case 'ERROR':
 			return Object.assign({}, state, { saving: false });
 		case 'BUSY_STATE':
 			return Object.assign({}, state, { saving: true });
 		case 'USER_CREATION_SUCCESS':
-			return Object.assign({}, state, { saving: false });
+			return Object.assign({}, state, { saving: false, authorized: true, authToken: action.user.authToken });
     default:
       return state;
   }

@@ -61,6 +61,12 @@ class LoginScreen extends Component {
     );
   }
 
+	componentDidUpdate() {
+		if (this.props.users.authorized) {
+			this.props.navigation.navigate({ routeName: 'RouteListScreen' });
+		}
+	}
+
   render() {
     return (
       <View style={{ flex: 1, backgroundColor: '#CAE8FF' }}>
@@ -106,12 +112,13 @@ const styles = {
 	}
 };
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state, ownProps) => {	
 	return Object.assign({}, state, {
     login: state.login,
     password: state.password,
     error: state.errorFlag,
-    saving: state.saving
+    saving: state.saving,
+		authorized: state.authorized
 	});
 };
 
