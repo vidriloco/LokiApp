@@ -2,8 +2,7 @@ import React from 'react';
 import { View, Image, Text, StyleSheet, Alert } from 'react-native';
 import { Icon, Button, Body, Title, List, ListItem, Thumbnail, Content, Left, Right } from 'native-base';
 
-import MapView, { Marker } from 'react-native-maps';
-import Geojson from 'react-native-geojson';
+import MapView, { Marker, Polyline } from 'react-native-maps';
 
 export default class MapViewScreen extends React.Component {
 	
@@ -19,18 +18,34 @@ export default class MapViewScreen extends React.Component {
       longitude: null,
       error: null,
 			locationUpdating: false,
+			currentRoute: this.props.navigation.state.params.route,
 			currentRouteId: this.props.navigation.state.params.routeId,
-			currentRoutePath: this.props.navigation.state.params.routePath,
 			vehicles: [],
     };
   }
 		
 	componentDidMount() {
-		this.centerMapOnMyLocation();
+		this.centerMapOnRouteLocation();
 		if(this.state.currentRouteId == global.currentRouteId) {
 			this.setState({ locationUpdating: true });
 		}
 		this.fetchVehicles();
+	}
+	
+	renderRouteSegments() {
+		let segments = this.state.currentRoute.segments;
+		let color = this.state.currentRoute.color;
+		let stroke = this.state.currentRoute.stroke;
+	  return segments.map(function(segment, i){
+	    return(
+				<Polyline
+					key={i}
+					coordinates={segment.coordinates}
+					strokeColor={color}
+					strokeWidth={stroke}
+				/>
+	    );
+	  });
 	}
 	
   render() {
@@ -39,7 +54,7 @@ export default class MapViewScreen extends React.Component {
 				<MapView style={styles.map}
 					showsUserLocation
 					ref={(ref) => { this.map = ref }}>
-					<Geojson geojson={ this.state.currentRoutePath } strokeColor="blue"  fillColor="blue" strokeWidth={3} />
+					{ this.renderRouteSegments() }
 					{this.state.vehicles.map(marker => (
 					    <Marker
 								key={marker.id}
@@ -81,6 +96,17 @@ export default class MapViewScreen extends React.Component {
 				return (<Button rounded style={styles.joinRoute} onPress={ () => { this.joinCurrentRoute() }}>
         	<Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>Unirme a esta ruta</Text>
       	</Button>)
+		}
+	}
+	
+	centerMapOnRouteLocation() {
+		if(this.map) {
+      this.map.animateToRegion({
+        latitude: this.state.currentRoute.segments[0].coordinates[0].latitude,
+        longitude: this.state.currentRoute.segments[0].coordinates[0].longitude,
+        latitudeDelta: 0.005,
+        longitudeDelta: 0.005
+      })
 		}
 	}
 	
