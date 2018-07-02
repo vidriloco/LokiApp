@@ -3,12 +3,21 @@ import { View, Image, Text, StyleSheet, Alert } from 'react-native';
 import { Icon, Button, Body, Title, List, ListItem, Thumbnail, Content, Left, Right } from 'native-base';
 
 import MapView, { Marker, Polyline } from 'react-native-maps';
+import APIRouter from '../_api/APIRouter';
+import LocalStore from '../_helpers/LocalStore';
 
 export default class MapViewScreen extends React.Component {
 	
 	static navigationOptions = {
-		title: 'Mapa de ruta'
-	}
+		headerTitle: 'Mapa de ruta',
+		headerRight: (
+	    <Button
+	      onPress={() => alert('This is a button!')}
+	      title="Info"
+	      color="#fff"
+	    />
+	  )
+	};
 	
 	constructor(props) {
     super(props);
@@ -21,6 +30,8 @@ export default class MapViewScreen extends React.Component {
 			currentRoute: this.props.navigation.state.params.route,
 			currentRouteId: this.props.navigation.state.params.routeId,
 			vehicles: [],
+			userToken: null, 
+			hasLoaded: false
     };
   }
 		
@@ -29,8 +40,14 @@ export default class MapViewScreen extends React.Component {
 		if(this.state.currentRouteId == global.currentRouteId) {
 			this.setState({ locationUpdating: true });
 		}
-		this.fetchVehicles();
 	}
+	
+	componentWillMount() {
+    LocalStore.currentUserToken().then((value) => {
+			this.setState({ userToken: value, hasLoaded: true });
+			this.fetchVehicles();
+    }).done();
+  }
 	
 	renderRouteSegments() {
 		let segments = this.state.currentRoute.segments;
@@ -58,9 +75,9 @@ export default class MapViewScreen extends React.Component {
 					{this.state.vehicles.map(marker => (
 					    <Marker
 								key={marker.id}
-					      coordinate={marker.latlng}
-					      title={marker.title}
-								image={marker.image}
+					      coordinate={marker.coordinate}
+					      title={marker.identifier}
+								image={require('../img/icon-bus.png')}
 					      description={marker.description}
 					    />
 					  )) }
@@ -79,28 +96,61 @@ export default class MapViewScreen extends React.Component {
   }
 	
 	fetchVehicles() {
-		this.setState({
-			vehicles: [
-					{ id: 1, latlng: { latitude: 19.49023665494256, longitude: -99.092984133749027 }, title: "Vehículo 1", description: "Última actualización hace 1 minuto", image: "https://lh3.googleusercontent.com/4lynMNVdriXHdH-ckfPUzD4Zi8WBAqYJ85gDgmuErW4lwg-5DsxZW2dH3lLeb4JKLK0uGNSaIh4W7A=w3360-h1812" },
-					{ id: 2, latlng: { latitude: 19.427941848472781, longitude: -99.111853519781988 }, title: "Vehículo 2", description: "Última actualización hace 3 minutos", image: "https://lh3.googleusercontent.com/4lynMNVdriXHdH-ckfPUzD4Zi8WBAqYJ85gDgmuErW4lwg-5DsxZW2dH3lLeb4JKLK0uGNSaIh4W7A=w3360-h1812" }
-			]
+		if(!this.state.hasLoaded) {
+			return
+		}
+		
+		var {url, body} = APIRouter.availableVehiclesForRoute(this.state.currentRouteId, this.state.userToken);
+		
+		return fetch(url, body)
+			.then(APIRouter.handleErrors)
+			.then(response => {				
+				this.setState({ vehicles: response.vehicles });
+	    }).catch(error => {
+				error.json().then(errorJSON => {
+					// Error
+			});
+		});
+	}
+	
+	uploadDeviceLocation() {
+		if(!this.state.hasLoaded) {
+			alert("Parece que no estás logeado");
+			return
+		}
+		
+		var {url, body} = APIRouter.updateRouteLocations(this.state.currentRouteId, this.state.latitude, this.state.longitude, this.state.userToken);
+		
+		return fetch(url, body)
+			.then(APIRouter.handleErrors)
+			.then(response => {				
+				// do nothing
+	    }).catch(error => {
+				error.json().then(errorJSON => {
+			});
 		});
 	}
 	
 	routeInfoOrJoin() {
-		if(this.state.locationUpdating || this.state.currentRouteId == global.currentRouteId) {
-				return (<Button rounded  style={styles.leaveRoute} onPress={ () => { this.leaveCurrentRoute() }}>
-        	<Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>Abandonar esta ruta</Text>
-      	</Button>)
+		if(this.state.currentRoute.allowsTracking) {
+			if(this.state.locationUpdating || this.state.currentRouteId == global.currentRouteId) {
+					return (<Button rounded  style={styles.leaveRoute} onPress={ () => { this.leaveCurrentRoute() }}>
+	        	<Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>Abandonar esta ruta</Text>
+				</Button>);
+			} else {
+					return (<Button rounded style={styles.joinRoute} onPress={ () => { this.joinCurrentRoute() }}>
+	        	<Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>Unirme a esta ruta</Text>
+				</Button>);
+			}
 		} else {
-				return (<Button rounded style={styles.joinRoute} onPress={ () => { this.joinCurrentRoute() }}>
-        	<Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>Unirme a esta ruta</Text>
-      	</Button>)
+				return (<Button rounded  style={styles.leaveRoute} onPress={ () => { this.askPermissionToJoinRoute() }}>
+        	<Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>Pedir permiso para unirse</Text>
+			</Button>);
 		}
 	}
 	
 	centerMapOnRouteLocation() {
-		if(this.map) {
+		if(this.map && this.state.currentRoute.segments.length > 0) {
       this.map.animateToRegion({
         latitude: this.state.currentRoute.segments[0].coordinates[0].latitude,
         longitude: this.state.currentRoute.segments[0].coordinates[0].longitude,
@@ -159,6 +209,7 @@ export default class MapViewScreen extends React.Component {
           longitude: position.coords.longitude,
           error: null
         });
+				this.uploadDeviceLocation();
       },
       (error) => this.setState({ error: error.message }),
       { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000, distanceFilter: 10 },
@@ -196,6 +247,12 @@ const styles = StyleSheet.create({
 		paddingRight: 20,
 		marginRight: 20,
 		backgroundColor: 'red',
+	},
+	askPermissionToJoinRoute: {
+		paddingLeft: 20, 
+		paddingRight: 20,
+		marginRight: 20,
+		backgroundColor: 'blue',
 	},
 	locateMe: {
 		paddingLeft: 10, 

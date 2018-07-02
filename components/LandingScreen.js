@@ -1,10 +1,36 @@
 import React from 'react';
-import { View, Image, Text } from 'react-native';
+import { View, Image, Text, ActivityIndicator } from 'react-native';
 import { Icon, Button, Body, Title } from 'native-base';
+import LocalStore from '../_helpers/LocalStore';
 
 export default class LandingScreen extends React.Component {
 	static navigationOptions = {
 		header: null
+	}
+	
+	constructor(props) {
+    super(props);
+    this.state = { userToken: null, hasLoaded: false };
+  }
+	
+	componentWillMount() {
+    LocalStore.currentUserToken().then((value) => {
+			this.setState({ userToken: value, hasLoaded: true });
+    }).done();
+  }
+	
+	displayNextButton() {
+		if(!this.state.hasLoaded) {
+			return (<ActivityIndicator />);
+		} else if(this.state.userToken != null) {
+			return (<Button rounded style={{ marginTop: 20, marginLeft: 'auto', marginRight: 'auto', paddingLeft: 20, paddingRight: 20 }} onPress={() => this.props.navigation.navigate('RouteListScreen')}>
+				<Text style={{ color: 'white', textAlign: 'center' }}>Ver Rutas</Text>
+			</Button>);
+		} else {
+			return (<Button rounded style={{ marginTop: 20, marginLeft: 'auto', marginRight: 'auto', paddingLeft: 20, paddingRight: 20 }} onPress={() => this.props.navigation.navigate('LoginScreen')}>
+				<Text style={{ color: 'white', textAlign: 'center' }}>Iniciar</Text>
+			</Button>);
+		}
 	}
 	
   render() {
@@ -20,9 +46,7 @@ export default class LandingScreen extends React.Component {
 	        	<Text style={{ color: 'white', textAlign: 'center' }}>Únete a Loki</Text>
 	      	</Button> */}
 					<Text style={{color: 'black', fontSize: 13, marginTop: 30, textAlign: 'center' }}>Ubicaciones en tiempo real compartidas anónimamente para mejorar la movilidad</Text>
-					<Button rounded style={{ marginTop: 20, marginLeft: 'auto', marginRight: 'auto', paddingLeft: 20, paddingRight: 20 }} onPress={() => this.props.navigation.navigate('LoginScreen')}>
-	        	<Text style={{ color: 'white', textAlign: 'center' }}>-></Text>
-	      	</Button>
+					{ this.displayNextButton() }
 					{/*<Button rounded bordered style={{ marginTop: 20, marginLeft: 'auto', marginRight: 'auto', paddingLeft: 20, paddingRight: 20 }}>
 	        	<Text style={{ color: '#058AF3', textAlign: 'center' }}>O ve rutas cercanas a tí</Text>
 	      	</Button>*/}

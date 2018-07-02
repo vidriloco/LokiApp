@@ -2,17 +2,25 @@ import React from 'react';
 import { View, Image, Text, StyleSheet } from 'react-native';
 import { Icon, Button, Body, Title, List, ListItem, Thumbnail, Content, Left, Right } from 'native-base';
 import APIRouter from '../_api/APIRouter';
+import LocalStore from '../_helpers/LocalStore';
 
 export default class RouteListScreen extends React.Component {
   constructor(props) {
       super(props);
 			
-			this.state = { routes: [] };
+			this.state = { routes: [], userToken: null, hasLoaded: false };
   }
 	
 	static navigationOptions = {
 		title: 'Rutas disponibles'
 	}
+	
+	componentWillMount() {
+    LocalStore.currentUserToken().then((value) => {
+			this.setState({ userToken: value, hasLoaded: true });
+			this.fetchRoutes();
+    }).done();
+  }
 	
 	isRouteGlobal(routeId) {
 		if(routeId == global.currentRouteId) {
@@ -24,7 +32,12 @@ export default class RouteListScreen extends React.Component {
 	}
 	
 	fetchRoutes() {
-		var {url, body} = APIRouter.availableRoutesForCurrentUser();
+		
+		if(!this.state.hasLoaded) {
+			return
+		}
+		
+		var {url, body} = APIRouter.availableRoutesForCurrentUser(this.state.userToken);
 		
 		return fetch(url, body)
 			.then(APIRouter.handleErrors)
@@ -37,8 +50,12 @@ export default class RouteListScreen extends React.Component {
 		});
 	}
 	
-	componentWillMount() {
-		this.fetchRoutes();
+	thumbnailForRoute(route) {
+		if(route.imageUrl.length == 0) {
+			return (<Thumbnail square size={80} source={ require('../img/logo-placeholder.png') } resizeMode="contain" />);
+		} else {
+			return (<Thumbnail square size={80} source={{ uri: route.imageUrl }} resizeMode="contain" />);
+		}
 	}
 	
   render() {
@@ -50,13 +67,13 @@ export default class RouteListScreen extends React.Component {
 					<List dataArray={this.state.routes}
             renderRow={(item) =>
 
-              <ListItem onPress={() => navigate('MapViewScreen', { routeId: item.id, route: { segments: item.paths, color: item.color, stroke: item.stroke } })} style={{flex: 1, flexDirection: 'column'}}>
+              <ListItem onPress={() => navigate('MapViewScreen', { routeId: item.id, route: { segments: item.paths, color: item.color, stroke: item.stroke, allowsTracking: item.allowsTracking } })} style={{flex: 1, flexDirection: 'column'}}>
 	              <View style={{flex: 1, flexDirection: 'row'}}>
-				          <Thumbnail square size={80} source={{ uri: item.imageUrl }} resizeMode="contain" />
+									{ this.thumbnailForRoute(item) }
 				          <Body style={{ marginLeft: 10 }}>
 										<Text>
 				            	<Text style={ styles.listItemTitle }>{ item.name }</Text>{"\n"}
-				            	<Text style={ styles.listItemDetails }>{ item.subtitle }</Text>
+				            	<Text style={ styles.listItemDetails }>{ item.subtitle || "No hay más información" }</Text>
 										</Text>
 				          </Body>
 				          <Right>

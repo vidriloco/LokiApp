@@ -1,31 +1,28 @@
-import { AsyncStorage } from 'react-native';
+import store from 'react-native-simple-store';
 
 class LocalStore {
 
 	static valueForKey(key) {
-		AsyncStorage.getItem(key).then(value => {
+		return store.get(key).then(value => {
 			if(value != null && typeof value !== 'undefined') {
 				return value;
 			}
 		}).catch(error => {
 			console.log(error);
-		})
-		return null;
+		});
 	}
 
-	static applyForKeyValue(key, block) {
-		var value = LocalStore.valueForKey(key);
-		return block(value);
-	}
-	
+
 	static store(key, value) {
-		AsyncStorage.setItem(key, value);
+		store.save(key, value);
 	}
 	
 	// API for local store
 	
 	static currentUserToken() {
-		return LocalStore.valueForKey(StoreKey.currentUser);
+		return LocalStore.valueForKey(StoreKey.currentUser).then(result => {
+			return result;
+		});
 	}
 	
 	static setCurrentUserToken(token) {

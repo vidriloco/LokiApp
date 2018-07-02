@@ -9,9 +9,9 @@ import { Provider } from 'react-redux';
 import configureStore from './_store/configureStore';
 
 import { StackNavigator } from 'react-navigation';
-import LocalStore from './_helpers/LocalStore';
 
 export default class App extends React.Component {		
+
 	render() {
 		const store = configureStore();
 		
@@ -43,14 +43,7 @@ const fade = (props) => {
     }
 }
 
-function initialRouteFor(router) {
-	if(LocalStore.currentUserToken() != null) {
-		return router("RouteListScreen");	
-	}
-	return router("RouteListScreen");
-}
-
-function configureRouter(initialRoute) {
+function configureRouter(initialRoute) {	
 	return StackNavigator({
 	  LandingScreen: { screen: LandingScreen },
 		LoginScreen: { screen: LoginScreen },
@@ -70,4 +63,4 @@ function configureRouter(initialRoute) {
 	});
 }
 
-const RouterStack = initialRouteFor(configureRouter);
+const RouterStack = configureRouter("LandingScreen");
