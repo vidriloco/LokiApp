@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Image, Text, StyleSheet, Alert } from 'react-native';
+import { View, Image, Text, StyleSheet, Alert, TouchableHighlight } from 'react-native';
 import { Icon, Button, Body, Title, List, ListItem, Thumbnail, Content, Left, Right } from 'native-base';
 
 import MapView, { Marker, Polyline } from 'react-native-maps';
@@ -10,13 +10,9 @@ export default class MapViewScreen extends React.Component {
 	
 	static navigationOptions = {
 		headerTitle: 'Mapa de ruta',
-		headerRight: (
-	    <Button
-	      onPress={() => alert('This is a button!')}
-	      title="Info"
-	      color="#fff"
-	    />
-	  )
+		headerRight: <TouchableHighlight style={{ marginRight: 10, backgroundColor: 'rgb(247,247,247)' }} underlayColor='rgb(247,247,247)' onPress={ () => { this.fetchVehicles() }}>
+    	<Text style={{ color: 'rgb(69,122,251)', fontSize: 18 }}>Actualizar</Text>
+  	</TouchableHighlight>
 	};
 	
 	constructor(props) {
