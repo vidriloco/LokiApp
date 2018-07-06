@@ -46,6 +46,13 @@ class APIRouter {
 	
 	// Routes routes
 	
+	static requestPermissionForRoute(routeId, token) {
+		return {			
+			url: `${this.backendURL}/api/trackings/${routeId}?auth_token=${token}`,
+			body: this.requestDetails('POST', {})
+		};
+	}
+	
 	static availableRoutesForCurrentUser(token) {
 		return {
 			url: `${this.backendURL}/api/routes?auth_token=${token}`

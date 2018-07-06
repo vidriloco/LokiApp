@@ -131,6 +131,24 @@ export default class MapViewScreen extends React.Component {
 		});
 	}
 	
+	askPermissionToJoinRoute() {
+		if(!this.state.hasLoaded) {
+			alert("Parece que no estás logeado");
+			return
+		}
+		
+		var {url, body} = APIRouter.requestPermissionForRoute(this.state.currentRouteId, this.state.userToken);
+		
+		return fetch(url, body)
+			.then(APIRouter.handleErrors)
+			.then(response => {				
+				alert("Hemos recibido tu petición. Vuelve más tarde para comenzar a compartir tu ubicación");
+	    }).catch(error => {
+				error.json().then(errorJSON => {
+			});
+		});
+	}
+	
 	routeInfoOrJoin() {
 		if(this.state.currentRoute.allowsTracking) {
 			if(this.state.locationUpdating || this.state.currentRouteId == global.currentRouteId) {
