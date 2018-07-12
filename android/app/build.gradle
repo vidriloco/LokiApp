@@ -95,7 +95,7 @@ def enableProguardInReleaseBuilds = false
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    buildToolsVersion '27.0.3'
 
     defaultConfig {
         applicationId "com.lokiapp"
@@ -137,8 +137,6 @@ android {
 }
 
 dependencies {
-    compile project(':react-native-background-fetch')
-    compile project(':react-native-background-geolocation')
     compile project(':react-native-vector-icons')
     compile project(':react-native-maps')
     compile fileTree(dir: "libs", include: ["*.jar"])

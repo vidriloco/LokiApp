@@ -1,6 +1,7 @@
 
 class APIRouter {
-	static backendURL = "http://localhost:3000";
+	//static backendURL = "http://localhost:3000";
+	static backendURL = "http://206.189.223.157";
 	
 	static handleErrors(response) {		
     if (!response.ok) { throw response }

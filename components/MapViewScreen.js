@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Image, Text, StyleSheet, Alert, TouchableHighlight } from 'react-native';
+import { View, Image, Text, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { Icon, Button, Body, Title, List, ListItem, Thumbnail, Content, Left, Right } from 'native-base';
 
 import MapView, { Marker, Polyline } from 'react-native-maps';
@@ -9,10 +9,7 @@ import LocalStore from '../_helpers/LocalStore';
 export default class MapViewScreen extends React.Component {
 	
 	static navigationOptions = {
-		headerTitle: 'Mapa de ruta',
-		headerRight: <TouchableHighlight style={{ marginRight: 10, backgroundColor: 'rgb(247,247,247)' }} underlayColor='rgb(247,247,247)' onPress={ () => { this.fetchVehicles() }}>
-    	<Text style={{ color: 'rgb(69,122,251)', fontSize: 18 }}>Actualizar</Text>
-  	</TouchableHighlight>
+		headerTitle: 'Mapa de ruta'
 	};
 	
 	constructor(props) {
@@ -27,7 +24,8 @@ export default class MapViewScreen extends React.Component {
 			currentRouteId: this.props.navigation.state.params.routeId,
 			vehicles: [],
 			userToken: null, 
-			hasLoaded: false
+			hasLoaded: false,
+			updating: false
     };
   }
 		
@@ -81,9 +79,12 @@ export default class MapViewScreen extends React.Component {
 				{ this.debugInfo() }
 				<View style={styles.bottomContainer}>
 					<View style={styles.bottomButtons}>
-					  { this.routeInfoOrJoin() }
+					  { this.renderRouteInfoOrJoin() }
 						<Button rounded style={styles.locateMe} onPress={ () => { this.centerMapOnMyLocation() }}>
 							<Image source={require('../img/locate-me-icon.png')} style={styles.icon} />
+		      	</Button>
+						<Button rounded warning style={styles.reload} onPress={ () => { this.fetchVehicles() }}>
+						{ this.renderVehiclesReloadView() }
 		      	</Button>
 					</View>
 				</View>
@@ -91,17 +92,45 @@ export default class MapViewScreen extends React.Component {
     );
   }
 	
+	renderRouteInfoOrJoin() {
+		if(this.state.currentRoute.allowsTracking) {
+			if(this.state.locationUpdating || this.state.currentRouteId == global.currentRouteId) {
+					return (<Button rounded  style={styles.leaveRoute} onPress={ () => { this.leaveCurrentRoute() }}>
+	        	<Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>Abandonar esta ruta</Text>
+				</Button>);
+			} else {
+					return (<Button rounded style={styles.joinRoute} onPress={ () => { this.joinCurrentRoute() }}>
+	        	<Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>Unirme a esta ruta</Text>
+				</Button>);
+			}
+		} else {
+				return (<Button rounded  style={styles.leaveRoute} onPress={ () => { this.askPermissionToJoinRoute() }}>
+        	<Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>Pedir permiso para unirse</Text>
+			</Button>);
+		}
+	}
+	
+	renderVehiclesReloadView() {
+		if(this.state.updating) {
+			return <ActivityIndicator size="large" color="white" style={{ marginLeft: 10, marginRight: 10 }} />
+		} else {
+			return <Image source={require('../img/reload-icon.png')} style={styles.icon} />;
+		}
+	}
+	
 	fetchVehicles() {
 		if(!this.state.hasLoaded) {
 			return
 		}
+		
+		this.setState({ updating: true });
 		
 		var {url, body} = APIRouter.availableVehiclesForRoute(this.state.currentRouteId, this.state.userToken);
 		
 		return fetch(url, body)
 			.then(APIRouter.handleErrors)
 			.then(response => {				
-				this.setState({ vehicles: response.vehicles });
+				this.setState({ vehicles: response.vehicles, updating: false });
 	    }).catch(error => {
 				error.json().then(errorJSON => {
 					// Error
@@ -138,29 +167,12 @@ export default class MapViewScreen extends React.Component {
 		return fetch(url, body)
 			.then(APIRouter.handleErrors)
 			.then(response => {				
-				alert("Hemos recibido tu petición. Vuelve más tarde para comenzar a compartir tu ubicación");
+				alert("Hemos recibido tu petición. Vuelve más tarde para comenzar a compartir tu ubicación.");
 	    }).catch(error => {
+				alert("Ya has iniciado una petición para unirte a esta ruta anteriormente. En breve podrás comenzar a compartir tu ubicación.");
 				error.json().then(errorJSON => {
 			});
 		});
-	}
-	
-	routeInfoOrJoin() {
-		if(this.state.currentRoute.allowsTracking) {
-			if(this.state.locationUpdating || this.state.currentRouteId == global.currentRouteId) {
-					return (<Button rounded  style={styles.leaveRoute} onPress={ () => { this.leaveCurrentRoute() }}>
-	        	<Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>Abandonar esta ruta</Text>
-				</Button>);
-			} else {
-					return (<Button rounded style={styles.joinRoute} onPress={ () => { this.joinCurrentRoute() }}>
-	        	<Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>Unirme a esta ruta</Text>
-				</Button>);
-			}
-		} else {
-				return (<Button rounded  style={styles.leaveRoute} onPress={ () => { this.askPermissionToJoinRoute() }}>
-        	<Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>Pedir permiso para unirse</Text>
-			</Button>);
-		}
 	}
 	
 	centerMapOnRouteLocation() {
@@ -313,5 +325,10 @@ const styles = StyleSheet.create({
 	icon: {
 		width: 30,
 		height: 30,
+	},
+	reload: {
+		paddingLeft: 10, 
+		paddingRight: 10,
+		marginLeft: 15
 	}
 });
