@@ -20,6 +20,7 @@ export function logIn(username, password) {
 			.then(APIRouter.handleErrors)
 			.then(response => {
 				LocalStore.setCurrentUserToken(response.user.authToken);
+				LocalStore.setCurrentUserRole(response.user.role);
 				dispatch(userLoginSuccess(response.user));
 	    }).catch(error => {
 				error.json().then(errorJSON => {
@@ -55,6 +56,7 @@ export function signUp(username, email, password) {
 			.then(APIRouter.handleErrors)
 			.then(response => {				
 				LocalStore.setCurrentUserToken(response.user.authToken);
+				LocalStore.setCurrentUserRole(response.user.role);
 				dispatch(userRegistrationSuccess(response.user));
 	    }).catch(error => {
 				error.json().then(errorJSON => {

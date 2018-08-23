@@ -28,10 +28,21 @@ class LocalStore {
 	static setCurrentUserToken(token) {
 		LocalStore.store(StoreKey.currentUser, token);
 	}
+	
+	static currentUserRole() {
+		return LocalStore.valueForKey(StoreKey.currentUserRole).then(result => {
+			return result;
+		});
+	}
+	
+	static setCurrentUserRole(role) {
+		LocalStore.store(StoreKey.currentUserRole, role);
+	}
 }
 
 class StoreKey {
 	static currentUser = "currentUser:authToken";
+	static currentUserRole = "currentUser:role";
 }
 
 export default LocalStore;

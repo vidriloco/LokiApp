@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, ActivityIndicator, Image, TextInput } from 'react-native';
+import { ScrollView, View, Text, ActivityIndicator, Image, TextInput } from 'react-native';
 import { Button } from 'native-base';
 import _ from 'lodash';
 import { connect } from 'react-redux';
@@ -69,31 +69,31 @@ class LoginScreen extends Component {
 
   render() {
     return (
-      <View style={{ flex: 1, backgroundColor: '#CAE8FF' }}>
-		<View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', marginLeft: 60, marginRight: 60 }}>
-    		<Image source={{uri: this.props.imageUrl }} style={{ height: 100, width: 100, marginTop: 30 }}/>
-				<Text style={{fontWeight: 'bold', color: '#058AF3', fontSize: 25, marginTop: 10 }}>Loki</Text>
-				<Text style={{fontWeight: 'bold', fontSize: 15, marginTop: 30, textAlign: 'center', marginBottom: 10  }}>Inicia sesión para seguir y compartir rutas</Text>
-        {this.renderError()}
+      <ScrollView style={{ flex: 1, backgroundColor: '#CAE8FF' }}>
+				<View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', marginLeft: 60, marginRight: 60 }}>
+	    		<Image source={{uri: this.props.imageUrl }} style={{ height: 100, width: 100, marginTop: 30 }}/>
+					<Text style={{fontWeight: 'bold', color: '#058AF3', fontSize: 25, marginTop: 10 }}>Loki</Text>
+					<Text style={{fontWeight: 'bold', fontSize: 15, marginTop: 30, textAlign: 'center', marginBottom: 10  }}>Inicia sesión para seguir y compartir rutas</Text>
+	        {this.renderError()}
 				
-	        <TextInput
-						autoCapitalize = 'none'
-			  		style={ styles.textInput }
-			  		placeholder="Nombre de usuario o e-mail"
-	          onChangeText={this.loginChanged.bind(this)}
-	          value={this.props.login} />
+		        <TextInput
+							autoCapitalize = 'none'
+				  		style={ styles.textInput }
+				  		placeholder="Nombre de usuario o e-mail"
+		          onChangeText={this.loginChanged.bind(this)}
+		          value={this.props.login} />
 
-	        <TextInput
-						autoCapitalize = 'none'
-			  		style={ styles.textInput }
-	          placeholder="Contraseña"
-	          onChangeText={this.passwordChanged.bind(this)}
-	          value={this.props.password}
-	          secureTextEntry />
+		        <TextInput
+							autoCapitalize = 'none'
+				  		style={ styles.textInput }
+		          placeholder="Contraseña"
+		          onChangeText={this.passwordChanged.bind(this)}
+		          value={this.props.password}
+		          secureTextEntry />
 		  
-			{ this.renderButton() }
-		</View>
-      </View>
+				{ this.renderButton() }
+				</View>
+      </ScrollView>
     );
   }
 }

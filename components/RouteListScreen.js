@@ -61,57 +61,64 @@ export default class RouteListScreen extends React.Component {
 	}
 	
 	updateRoutesMessage() {
-		if(this.state.updating) {
-			return (<View style={{flex: 1, flexDirection: 'row'}}>
-					<ActivityIndicator size="small" color="gray" style={{ marginLeft: 30 }}/>
-					<Text style={ styles.updatingRoutesText }>Actualizando rutas</Text>
-				</View>);
-		} else {
-			return (<View style={{flex: 1, flexDirection: 'row'}}>
-					<Text style={ styles.updateRoutesText }>Actualizar rutas</Text>
-				</View>);
+		if(!this.state.updating) {
+			return <View style={{flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+				<Button rounded style={{ paddingLeft: 20,  paddingRight: 20, marginRight: 20, }} onPress={ () => { this.fetchRoutes() }}>
+        <Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>Actualizar rutas</Text>
+			</Button>
+			</View>;
 		}
 	}
 	
   render() {
 		const { navigate } = this.props.navigation;
 
-    return (
-			<View style={{ flex: 1, backgroundColor: '#CAE8FF' }}>
-				<Content>
-					<List dataArray={[1]}
-		        renderRow={(item) =>
+		if(this.state.updating) {
+			return (<View style={{flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+				<View style={{ height: 40 }}>
+					<Text style={{ color: 'black', textAlign: 'center', fontWeight: 'bold', fontSize: 20 }}>Actualizando rutas</Text>
+				</View>
+				<View style={{ height: 40 }}>
+					<ActivityIndicator size="large" color="black" style={{ marginLeft: 10, marginRight: 10 }} />
+				</View>
+				<View style={{ height: 60 }}>
+					<Text style={{ color: 'black', textAlign: 'center', fontSize: 15 }}>Espera un momento por favor ...</Text>
+				</View>
+			</View>);
+		} else {
+			return (<View style={{flex: 1, flexDirection: 'row'}}>
+					<Content>
+						<List dataArray={[1]}
+			        renderRow={(item) =>
 
-		          <ListItem onPress={() => this.fetchRoutes() } style={{ backgroundColor: '#F0CD3F', marginLeft: 0 }}>
-		            <View style={{flex: 1, flexDirection: 'row'}}>
+			          <ListItem onPress={() => this.fetchRoutes() } style={{ flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
 									{ this.updateRoutesMessage() }
-								</View>
-		          </ListItem>
-		        }>
-		      </List>
-					<List dataArray={this.state.routes}
-            renderRow={(item) =>
+			          </ListItem>
+			        }>
+			      </List>
+							<List dataArray={this.state.routes}
+		            renderRow={(item) =>
 
-              <ListItem onPress={() => navigate('MapViewScreen', { routeId: item.id, route: { segments: item.paths, color: item.color, stroke: item.stroke, allowsTracking: item.allowsTracking } })} style={{flex: 1, flexDirection: 'column'}}>
-	              <View style={{flex: 1, flexDirection: 'row'}}>
-									{ this.thumbnailForRoute(item) }
-				          <Body style={{ marginLeft: 10 }}>
-										<Text>
-				            	<Text style={ styles.listItemTitle }>{ item.name }</Text>{"\n"}
-				            	<Text style={ styles.listItemDetails }>{ item.subtitle || "No hay más información" }</Text>
-										</Text>
-				          </Body>
-				          <Right>
-										<Text style={ styles.listButton }>Ver ruta</Text>
-				          </Right>
-								</View>
-								{ this.isRouteGlobal(item.id) }
-              </ListItem>
-            }>
-          </List>
-				</Content>
-			</View>
-    );
+		              <ListItem onPress={() => navigate('MapViewScreen', { routeId: item.id, route: { segments: item.paths, color: item.color, stroke: item.stroke, allowsTracking: item.allowsTracking } })} style={{flex: 1, flexDirection: 'column'}}>
+			              <View style={{flex: 1, flexDirection: 'row'}}>
+											{ this.thumbnailForRoute(item) }
+						          <Body style={{ marginLeft: 10 }}>
+												<Text>
+						            	<Text style={ styles.listItemTitle }>{ item.name }</Text>{"\n"}
+						            	<Text style={ styles.listItemDetails }>{ item.subtitle || "No hay más información" }</Text>
+												</Text>
+						          </Body>
+						          <Right>
+												<Text style={ styles.listButton }>Ver ruta</Text>
+						          </Right>
+										</View>
+										{ this.isRouteGlobal(item.id) }
+		              </ListItem>
+		            }>
+						</List>
+					</Content>
+				</View>);
+		}
   }
 }
 

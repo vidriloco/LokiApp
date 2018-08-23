@@ -25,7 +25,8 @@ export default class MapViewScreen extends React.Component {
 			vehicles: [],
 			userToken: null, 
 			hasLoaded: false,
-			updating: false
+			updating: false,
+			requestingChecking: false
     };
   }
 		
@@ -33,6 +34,8 @@ export default class MapViewScreen extends React.Component {
 		this.centerMapOnRouteLocation();
 		if(this.state.currentRouteId == global.currentRouteId) {
 			this.setState({ locationUpdating: true });
+			// Updating of location should trigger the request on location updates
+			this.startLoggingPositionForRouteSharing();
 		}
 	}
 	
@@ -41,6 +44,14 @@ export default class MapViewScreen extends React.Component {
 			this.setState({ userToken: value, hasLoaded: true });
 			this.fetchVehicles();
     }).done();
+		
+    LocalStore.currentUserRole().then((value) => {
+			this.setState({ isDriver: (value !== "passenger") });
+    }).done();
+  }
+	
+  componentWillUnmount() {
+		this.leaveCurrentRoute();
   }
 	
 	renderRouteSegments() {
@@ -93,21 +104,51 @@ export default class MapViewScreen extends React.Component {
   }
 	
 	renderRouteInfoOrJoin() {
-		if(this.state.currentRoute.allowsTracking) {
-			if(this.state.locationUpdating || this.state.currentRouteId == global.currentRouteId) {
-					return (<Button rounded  style={styles.leaveRoute} onPress={ () => { this.leaveCurrentRoute() }}>
-	        	<Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>Abandonar esta ruta</Text>
-				</Button>);
-			} else {
-					return (<Button rounded style={styles.joinRoute} onPress={ () => { this.joinCurrentRoute() }}>
-	        	<Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>Unirme a esta ruta</Text>
-				</Button>);
-			}
+		if(!this.state.isDriver) {
+			return this.renderCheckInButtonOrInProgressView();
+		}
+
+		if(this.state.locationUpdating || this.state.currentRouteId == global.currentRouteId) {
+				return (<Button rounded  style={styles.leaveRoute} onPress={ () => { this.leaveCurrentRoute() }}>
+        	<Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>Dejar esta ruta</Text>
+			</Button>);
 		} else {
-				return (<Button rounded  style={styles.leaveRoute} onPress={ () => { this.askPermissionToJoinRoute() }}>
-        	<Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>Pedir permiso para unirse</Text>
+				return (<Button rounded style={styles.joinRoute} onPress={ () => { this.joinCurrentRoute() }}>
+        	<Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>Chofer de esta ruta</Text>
 			</Button>);
 		}
+		
+		// Disabled, for the moment, the tracking allowance check for users which have a role 'driver'
+		/*if(!this.state.currentRoute.allowsTracking) {
+				return (<Button rounded  style={styles.leaveRoute} onPress={ () => { this.askPermissionToJoinRoute() }}>
+        	<Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>Añadirme a ruta</Text>
+			</Button>);
+		}*/
+	}
+	
+	checkInOnRoute() {
+		this.setState({ requestingChecking: true });
+		global.currentRouteId = this.state.currentRouteId;
+		global.currentRouteProcessID = navigator.geolocation.getCurrentPosition(
+      (position) => {
+				if(this.state.latitude != position.coords.latitude && this.state.longitude != position.coords.longitude) {
+	        this.setState({
+	          latitude: position.coords.latitude,
+	          longitude: position.coords.longitude,
+	          error: null
+	        });
+					this.uploadDeviceLocation(true, function() {
+						alert("Has hecho check-in!");
+					});
+					// We update the vehicles location on every location measurement
+					this.fetchVehicles();
+				}
+				this.setState({ requestingChecking: false });
+      },
+      (error) => this.setState({ error: error.message, requestingChecking: false }),
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 0, distanceFilter: 1 },
+    );
+		
 	}
 	
 	renderVehiclesReloadView() {
@@ -115,6 +156,18 @@ export default class MapViewScreen extends React.Component {
 			return <ActivityIndicator size="large" color="white" style={{ marginLeft: 10, marginRight: 10 }} />
 		} else {
 			return <Image source={require('../img/reload-icon.png')} style={styles.icon} />;
+		}
+	}
+	
+	renderCheckInButtonOrInProgressView() {
+		if(this.state.requestingChecking) {
+			return (<Button rounded style={styles.joinRoute} onPress={ () => { }}>
+				<ActivityIndicator size="large" color="white" style={{ marginLeft: 10, marginRight: 10 }} />
+			</Button>);
+		} else {
+			return (<Button rounded  style={styles.joinRoute} onPress={ () => { this.checkInOnRoute() }}>
+        <Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>Hacer check-in</Text>
+			</Button>);
 		}
 	}
 	
@@ -126,7 +179,6 @@ export default class MapViewScreen extends React.Component {
 		this.setState({ updating: true });
 		
 		var {url, body} = APIRouter.availableVehiclesForRoute(this.state.currentRouteId, this.state.userToken);
-		
 		return fetch(url, body)
 			.then(APIRouter.handleErrors)
 			.then(response => {				
@@ -137,19 +189,23 @@ export default class MapViewScreen extends React.Component {
 			});
 		});
 	}
-	
-	uploadDeviceLocation() {
+		
+	uploadDeviceLocation(markAsCheckIn=false, callback={}) {
 		if(!this.state.hasLoaded) {
 			alert("Parece que no estás logeado");
 			return
 		}
 		
-		var {url, body} = APIRouter.updateRouteLocations(this.state.currentRouteId, this.state.latitude, this.state.longitude, this.state.userToken);
+		if(!this.isCoordinatePairValid(this.state.latitude, this.state.longitude)) {
+			return
+		}
+		
+		var {url, body} = APIRouter.updateRouteLocations(this.state.currentRouteId, this.state.latitude, this.state.longitude, this.state.userToken, markAsCheckIn);
 		
 		return fetch(url, body)
 			.then(APIRouter.handleErrors)
 			.then(response => {				
-				// do nothing
+				callback(); 
 	    }).catch(error => {
 				error.json().then(errorJSON => {
 			});
@@ -230,23 +286,30 @@ export default class MapViewScreen extends React.Component {
 		global.currentRouteId = this.state.currentRouteId;
 		global.currentRouteProcessID = navigator.geolocation.watchPosition(
       (position) => {
-        this.setState({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          error: null
-        });
-				this.uploadDeviceLocation();
+				if(this.state.latitude != position.coords.latitude && this.state.longitude != position.coords.longitude) {
+	        this.setState({
+	          latitude: position.coords.latitude,
+	          longitude: position.coords.longitude,
+	          error: null
+	        });
+					this.uploadDeviceLocation();
+					// We update the vehicles location on every location measurement
+					this.fetchVehicles();
+				}
       },
       (error) => this.setState({ error: error.message }),
-      { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000, distanceFilter: 10 },
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 0, distanceFilter: 1 },
     );
 		
 		this.setState({ locationUpdating: true });
 	}
 	
-  componentWillUnmount() {
-    //this.leaveCurrentRoute();
-  }
+	isCoordinatePairValid(lat, lng) {
+		if(lat != null && lng != null && parseFloat(lat) != 0 && parseFloat(lng) != 0) {
+			return true;
+		}
+		return false
+	}
 	
 	debugInfo() {
 		let locationUpdating = this.state.locationUpdating ? "Yes" : "No";

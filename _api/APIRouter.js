@@ -1,6 +1,6 @@
 
 class APIRouter {
-	//static backendURL = "http://localhost:3000";
+	//static backendURL = "http://127.0.0.1:3000";
 	static backendURL = "http://206.189.223.157";
 	
 	static handleErrors(response) {		
@@ -45,6 +45,12 @@ class APIRouter {
 		};
 	};
 	
+	static userDetails(token) {
+		return {
+			url: `${this.backendURL}/api/users/${token}`
+		};
+	}
+	
 	// Routes routes
 	
 	static requestPermissionForRoute(routeId, token) {
@@ -71,7 +77,7 @@ class APIRouter {
 	// or to allow him to provide a plate number of the vehicle
 	// For now, all users which have not been banned will be shown the submit location for a route:
 	// If they were banned they will not be shown the share location dialog on the route view
-	static updateRouteLocations(routeId, latitude, longitude, token) {
+	static updateRouteLocations(routeId, latitude, longitude, token, markAsCheckIn) {
 		return {			
 			url: `${this.backendURL}/api/vehicles?auth_token=${token}`,
 			body: this.requestDetails('POST', {
@@ -81,7 +87,8 @@ class APIRouter {
 					// Vehicle Id will be null for now, user cannot change it at the moment
 					identifier: null
 	    	},
-				route_id: routeId
+				route_id: routeId,
+				is_a_check_in: markAsCheckIn
 	    })
 		};
 	}

@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Image, Text, ActivityIndicator } from 'react-native';
+import { ScrollView, View, Image, Text, ActivityIndicator } from 'react-native';
 import { Icon, Button, Body, Title } from 'native-base';
 import LocalStore from '../_helpers/LocalStore';
+import APIRouter from '../_api/APIRouter';
 
 export default class LandingScreen extends React.Component {
 	static navigationOptions = {
@@ -16,8 +17,25 @@ export default class LandingScreen extends React.Component {
 	componentWillMount() {
     LocalStore.currentUserToken().then((value) => {
 			this.setState({ userToken: value, hasLoaded: true });
+			if(typeof value !== undefined) {
+				this.updateUserData();
+			}
     }).done();
   }
+	
+	updateUserData() {
+		var {url, body} = APIRouter.userDetails(this.state.userToken);
+		
+		return fetch(url, body)
+			.then(APIRouter.handleErrors)
+			.then(response => {				
+				LocalStore.setCurrentUserRole(response.user.role);
+	    }).catch(error => {
+				error.json().then(errorJSON => {
+					// Error
+			});
+		});
+	}
 	
 	displayNextButton() {
 		if(!this.state.hasLoaded) {
@@ -33,10 +51,10 @@ export default class LandingScreen extends React.Component {
 		}
 	}
 	
-  render() {
+  render() {		
     return (
-			<View style={{ flex: 1, backgroundColor: '#CAE8FF' }}>
-				<View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', marginLeft: 60, marginRight: 60 }}>
+			<ScrollView style={{ flex: 1, backgroundColor: '#CAE8FF' }}>
+				<View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', marginLeft: 60, marginRight: 60, marginTop: 80 }}>
 	    		<Image source={{uri: this.props.imageUrl }} style={{ height: 200, width: 200 }}/>
 					<Text style={{fontWeight: 'bold', color: '#058AF3', fontSize: 25, marginTop: 20 }}>Loki</Text>
 					<Text style={{fontWeight: 'bold', color: 'black', fontSize: 15, marginTop: 5, textAlign: 'center'  }}>Rutas colaborativas en tiempo real</Text>
@@ -51,7 +69,7 @@ export default class LandingScreen extends React.Component {
 	        	<Text style={{ color: '#058AF3', textAlign: 'center' }}>O ve rutas cercanas a tí</Text>
 	      	</Button>*/}
 				</View>
-			</View>
+			</ScrollView>
     );
   }
 }
